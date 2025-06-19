@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="description" content="منصة تسجيل بيانات الفريق. تعمل مباشرة من GitHub Pages.">
+	<meta name="theme-color" content="#0a0a0a">
+	<title>تسجيل بيانات الفريق</title>
+
+	<!-- React & Babel for dynamic UI -->
+	<script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+	<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+	<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+	<!-- The beautiful styling -->
+	<style>
+		@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap");
+		@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;700&display=swap");
+		
+		:root { --color-primary: #5e9cff; --color-primary-dark: #4b7dcc; --color-danger-red: #ff5252; --color-bg: #0a0a0a; --color-card: rgba(20,20,22,0.75); --color-border: rgba(255,255,255,0.1); --color-text: #e0e0e0; --color-text-muted: #999; --font-body: "Cairo", sans-serif; --font-title: "IBM Plex Sans Arabic", sans-serif; --radius: 16px; --transition: 0.3s cubic-bezier(0.25,0.8,0.25,1); --transition-smooth: 0.5s cubic-bezier(0.2,0.8,0.2,1); --rgb-primary: 94,156,255; }
+		* { margin: 0; padding: 0; box-sizing: border-box; }
+		@keyframes gradient-animation { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+		@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+		@keyframes scaleIn { from { opacity: 0; transform: scale(.95); } to { opacity: 1; transform: scale(1); } }
+		
+		body { font-family: var(--font-body); background-color: var(--color-bg); color: var(--color-text); direction: rtl; overflow-x: hidden; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+		.app { min-height: 100vh; position: relative; padding: 2rem 1rem; }
+		.aurora-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: -1; transition: all .5s ease; }
+		.aurora-dot { position: absolute; border-radius: 50%; filter: blur(120px); opacity: .25; transition: background-color .5s ease; }
+		.aurora-dot-1 { width: 50vw; height: 50vw; background-color: var(--color-primary); top: 5%; left: 0%; animation: move-aurora-1 25s infinite alternate ease-in-out; }
+		.aurora-dot-2 { width: 45vw; height: 45vw; background-color: var(--color-primary-dark); bottom: 10%; right: 5%; animation: move-aurora-2 30s infinite alternate-reverse ease-in-out; }
+		@keyframes move-aurora-1 { from { transform: translate(0,0) rotate(0deg) scale(1); } to { transform: translate(15vw,20vh) rotate(120deg) scale(1.2); } }
+		@keyframes move-aurora-2 { from { transform: translate(0,0) rotate(0deg) scale(1.2); } to { transform: translate(-10vw,-15vh) rotate(-150deg) scale(1); } }
+		.container { width: 100%; max-width: 700px; z-index: 1; display: flex; flex-direction: column; gap: 1.5rem; margin: 0 auto; position: relative; }
+		.header { text-align: center; animation: fadeInUp .8s var(--transition-smooth) both; margin-bottom: 1rem; }
+		.title { font-family: var(--font-title); font-weight: 700; font-size: 2.8rem; margin-bottom: 0.25rem; background: linear-gradient(90deg, var(--color-primary-dark), var(--color-primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-size: 200% 200%; animation: gradient-animation 5s ease-in-out infinite; }
+		.subtitle { color: var(--color-text-muted); font-size: 1.1rem; animation: fadeInUp .8s var(--transition-smooth) .2s both; letter-spacing: 0.5px; }
+		.card { background: var(--color-card); border: 1px solid var(--color-border); border-radius: var(--radius); padding: 2rem; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); transition: var(--transition); position: relative; animation: scaleIn .8s var(--transition-smooth) .4s both; box-shadow: 0 10px 30px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.05), inset 0 -1px 0 rgba(0,0,0,0.2); border-image: linear-gradient(to top right, rgba(255,255,255,0.15), rgba(255,255,255,0.05)) 1; }
+        .card:hover { transform: translateY(-5px) scale(1.01); box-shadow: 0 15px 35px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05), inset 0 -1px 0 rgba(0,0,0,0.2); }
+		.card-header { text-align: center; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--color-border); }
+		.card-header h2 { font-family: var(--font-title); font-weight: 700; font-size: 1.9rem; color: #fff; display: flex; align-items: center; justify-content: center; gap: 0.75rem; }
+        .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem 1.5rem; }
+        .floating-label-group { position: relative; opacity: 0; animation: fadeInUp .5s ease-out forwards; }
+        .floating-label-group.full-width { grid-column: 1 / -1; }
+        .floating-label-group .form-control { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--color-border); border-radius: 8px; padding: 1rem; color: var(--color-text); font-family: var(--font-body); font-size: 1rem; transition: var(--transition); box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
+        .floating-label-group textarea.form-control { resize: vertical; min-height: 110px; padding-top: 1.5rem; }
+        .floating-label-group .form-label { position: absolute; top: 1rem; right: 1rem; color: var(--color-text-muted); pointer-events: none; transition: all 0.2s ease-out; background-color: transparent; padding: 0 0.25rem; }
+        .form-control:focus + .form-label, .form-control:not(:placeholder-shown) + .form-label { top: -0.7rem; right: 0.75rem; font-size: 0.8rem; color: var(--color-primary); background-color: #121317; }
+        .form-control:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(var(--rgb-primary), 0.4), inset 0 2px 4px rgba(0,0,0,0.2); }
+        .submit-button { position: relative; width: 100%; padding: 1rem; font-family: var(--font-body); font-size: 1.2rem; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; background: linear-gradient(90deg, var(--color-primary-dark), var(--color-primary)); color: #fff; transition: all .2s ease-in-out; display: flex; justify-content: center; align-items: center; gap: .75rem; user-select: none; margin-top: 2rem; }
+		.submit-button:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 4px 15px rgba(var(--rgb-primary), 0.25); filter: brightness(1.1); }
+		.footer { text-align: center; color: var(--color-text-muted); font-size: .9rem; padding-top: 1.5rem; margin-top: 1rem; border-top: 1px solid var(--color-border); animation: fadeInUp .8s var(--transition-smooth) .8s both; }
+		.footer a { color: var(--color-text-muted); transition: var(--transition); text-decoration: none; background: linear-gradient(90deg, var(--color-primary), #a777ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-size: 200% 200%; }
+		.footer a:hover { animation: gradient-animation 3s ease-in-out infinite; }
+		@media (max-width: 600px) {
+			.app { padding: 1.5rem 1rem; } .card { padding: 1.5rem; } .title { font-size: 2.2rem; } .subtitle { font-size: 1rem; } .card-header h2 { font-size: 1.6rem; } .input-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+		}
+	</style>
+</head>
+<body>
+	<noscript>تحتاج لتفعيل JavaScript لاستخدام هذا التطبيق.</noscript>
+	<div id="root"></div>
+
+	<script type="text/babel">
+		const { StrictMode } = React;
+		
+		const SvgIcon = ({ d, viewBox = "0 0 24 24", ...props }) => (
+			<svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox={viewBox} height="1em" width="1em" xmlns="http://www.w3.org/2000/svg" {...props}><path d={d}></path></svg>
+		);
+
+		const Icons = {
+            ClipboardList: props => <SvgIcon d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" {...props} />,
+			Send: props => <SvgIcon d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" {...props} />,
+		};
+
+        const FloatingLabelInput = ({ id, name, type = "text", delay }) => {
+            const isTextarea = type === "textarea";
+            return (
+                <div className={`floating-label-group ${isTextarea ? 'full-width' : ''}`} style={{animationDelay: `${delay}ms`}}>
+                    {isTextarea ? (
+                        <textarea className="form-control" id={id} name={name} placeholder=" " required />
+                    ) : (
+                        <input type={type} className="form-control" id={id} name={name} placeholder=" " required />
+                    )}
+                    <label htmlFor={id} className="form-label">{name}</label>
+                </div>
+            );
+        };
+
+		function RegistrationForm() {
+            const formFields = [
+                { id: 'name', name: 'الاسم الكامل', type: 'text' },
+                { id: 'email', name: 'البريد الإلكتروني', type: 'email' },
+                { id: 'phone', name: 'رقم الجوال', type: 'tel' },
+                { id: 'university', name: 'الجامعة', type: 'text' },
+                { id: 'major', name: 'التخصص', type: 'text' },
+                { id: 'teamRole', name: 'موقعك في الفريق', type: 'textarea' },
+            ];
+
+			return (
+				// --- هذا هو الجزء السحري ---
+				<form action="https://formsubmit.co/owiiiwiw@gmail.com" method="POST" className="card">
+                    
+                    {/* إعدادات إضافية لتحسين التجربة (اختياري لكن موصى به) */}
+                    <input type="hidden" name="_subject" value="🌟 تسجيل عضو جديد في الفريق!" />
+                    <input type="hidden" name="_template" value="table" />
+                    <input type="hidden" name="_captcha" value="false" />
+                    
+					<div className="card-header">
+						<h2><Icons.ClipboardList /> تسجيل / تحديث بيانات عضو</h2>
+					</div>
+					<div className="input-grid">
+                        {formFields.map((field, index) => (
+                            <FloatingLabelInput 
+                                key={field.id}
+                                id={field.id}
+                                name={field.name} // اسم الحقل سيظهر كعنوان للعمود في الإيميل
+                                type={field.type}
+                                delay={index * 50}
+                            />
+                        ))}
+					</div>
+					<button type="submit" className="submit-button">
+						<span className="button-text">إرسال البيانات</span>
+					</button>
+				</form>
+			);
+		}
+
+		function App() {
+			return (
+				<div className="app">
+					<div className="aurora-bg">
+						<div className="aurora-dot aurora-dot-1"></div>
+						<div className="aurora-dot aurora-dot-2"></div>
+					</div>
+					<div className="container">
+						<header className="header">
+							<h1 className="title">بوابة بيانات الفريق</h1>
+							<p className="subtitle">سواء كنت عضواً جديداً أو حالياً، نرجو منك تعبئة بياناتك</p>
+						</header>
+						<RegistrationForm />
+						<footer className="footer">
+							<span>تم تصميمه وتطويره من قبل <a href="https://t.me/zalam_0" target="_blank" rel="noopener noreferrer">ظلام</a>، قائد اللجنة التقنية</span>
+						</footer>
+					</div>
+				</div>
+			);
+		}
+		
+		const root = ReactDOM.createRoot(document.getElementById("root"));
+		root.render(<StrictMode><App /></StrictMode>);
+	</script>
+</body>
+</html>
